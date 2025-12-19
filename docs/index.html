@@ -1,1 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Miner Monitor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>⛏️ Crypto Miner Monitor</h1>
+            <p>Track the top cryptocurrencies in real-time</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Crypto Selection -->
+            <section class="crypto-selector">
+                <h2>Select a Cryptocurrency</h2>
+                <div class="crypto-buttons" id="cryptoButtons"></div>
+            </section>
+
+            <!-- Selected Crypto Details -->
+            <section class="crypto-details">
+                <div class="details-card" id="detailsCard">
+                    <div class="placeholder">Select a cryptocurrency to view details</div>
+                </div>
+            </section>
+
+            <!-- Live Market Stats -->
+            <section class="market-stats">
+                <h2>Market Overview</h2>
+                <div class="stats-grid" id="statsGrid"></div>
+            </section>
+
+            <!-- 24h Price Chart -->
+            <section class="chart-section">
+                <h2>24h Price Change</h2>
+                <div class="chart-container" id="chartContainer"></div>
+            </section>
+
+            <!-- Refresh Control -->
+            <section class="controls">
+                <button class="refresh-btn" id="refreshBtn">🔄 Refresh Data</button>
+                <p class="last-update" id="lastUpdate">Last updated: --:-- --</p>
+            </section>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
 
