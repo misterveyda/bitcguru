@@ -16,15 +16,31 @@
 
         <!-- Auth UI -->
         <section class="auth-section">
-            <div class="auth-box">
-                <input id="emailInput" type="email" placeholder="Email" />
-                <input id="passwordInput" type="password" placeholder="Password" />
-                <div class="auth-actions">
-                    <button id="registerBtn">Register</button>
-                    <button id="loginBtn">Login</button>
-                    <button id="logoutBtn" style="display:none">Logout</button>
+            <div class="auth-container">
+                <div class="auth-box">
+                    <input id="emailInput" type="email" placeholder="Email" />
+                    <input id="passwordInput" type="password" placeholder="Password" />
+                    <div class="auth-actions">
+                        <button id="registerBtn">Register</button>
+                        <button id="loginBtn">Login</button>
+                        <button id="logoutBtn" style="display:none">Logout</button>
+                    </div>
+                    <p id="authMessage" class="auth-message"></p>
                 </div>
-                <p id="authMessage" class="auth-message"></p>
+
+                <!-- Virtual Miner / Wallet -->
+                <div class="miner-box" id="minerBox" style="display:none">
+                    <h3>Your Virtual Miner</h3>
+                    <p>Balance: <span id="walletBalance">0</span></p>
+                    <p>Accrued (unclaimed): <span id="minerAccrued">0</span></p>
+                    <p>Hash Rate: <span id="minerHash">1.0</span> H/s</p>
+                    <div class="miner-actions">
+                        <button id="startMinerBtn">Start Miner</button>
+                        <button id="stopMinerBtn">Stop Miner</button>
+                        <button id="claimMinerBtn">Claim Rewards</button>
+                    </div>
+                    <p id="minerMessage" class="auth-message"></p>
+                </div>
             </div>
         </section>
 

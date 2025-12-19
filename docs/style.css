@@ -46,14 +46,26 @@ body {
     justify-content: center;
 }
 
+.auth-container {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 900px;
+    justify-content: center;
+}
+
 .auth-box {
     display: flex;
+    flex-direction: column;
     gap: 8px;
-    align-items: center;
+    align-items: stretch;
     background: rgba(255,255,255,0.02);
-    padding: 8px;
+    padding: 12px;
     border-radius: 8px;
     border: 1px solid rgba(255,215,0,0.06);
+    min-width: 260px;
+    width: 320px;
 }
 
 .auth-box input {
@@ -62,6 +74,25 @@ body {
     border: 1px solid rgba(255,255,255,0.06);
     background: transparent;
     color: #e0e0e0;
+}
+
+.miner-box {
+    background: rgba(255,255,255,0.02);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,215,0,0.06);
+    min-width: 220px;
+    width: 320px;
+}
+
+.miner-actions button {
+    padding: 8px 10px;
+    margin-right: 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,215,0,0.12);
+    background: rgba(0,0,0,0.4);
+    color: #ffd700;
+    cursor: pointer;
 }
 
 .auth-actions button {
@@ -445,6 +476,16 @@ body {
 @media (max-width: 768px) {
     .header h1 {
         font-size: 2em;
+    }
+
+    .auth-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .auth-box, .miner-box {
+        width: 100%;
+        max-width: none;
     }
 
     .crypto-buttons {

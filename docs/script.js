@@ -404,6 +404,14 @@ function setupAuthUI() {
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     const msg = document.getElementById('authMessage');
+    const minerBox = document.getElementById('minerBox');
+    const walletBalance = document.getElementById('walletBalance');
+    const minerAccrued = document.getElementById('minerAccrued');
+    const minerHash = document.getElementById('minerHash');
+    const minerMessage = document.getElementById('minerMessage');
+    const startMinerBtn = document.getElementById('startMinerBtn');
+    const stopMinerBtn = document.getElementById('stopMinerBtn');
+    const claimMinerBtn = document.getElementById('claimMinerBtn');
 
     registerBtn.addEventListener('click', async () => {
         const res = await fetch('/api/auth/register', {
@@ -416,6 +424,7 @@ function setupAuthUI() {
             localStorage.setItem('token', json.token);
             msg.textContent = 'Registered and logged in';
             loginState(true);
+            refreshMinerStatus();
         } else {
             msg.textContent = json.error || 'Register failed';
         }
@@ -432,6 +441,7 @@ function setupAuthUI() {
             localStorage.setItem('token', json.token);
             msg.textContent = 'Logged in';
             loginState(true);
+            refreshMinerStatus();
         } else {
             msg.textContent = json.error || 'Login failed';
         }
@@ -448,19 +458,121 @@ function setupAuthUI() {
             registerBtn.style.display = 'none';
             loginBtn.style.display = 'none';
             logoutBtn.style.display = 'inline-block';
+            if (minerBox) minerBox.style.display = 'block';
         } else {
             registerBtn.style.display = '';
             loginBtn.style.display = '';
             logoutBtn.style.display = 'none';
+            if (minerBox) minerBox.style.display = 'none';
         }
     }
 
     // init state
     loginState(!!localStorage.getItem('token'));
+
+    // miner actions wiring
+    if (startMinerBtn) startMinerBtn.addEventListener('click', async () => {
+        startMinerBtn.disabled = true;
+        await startMiner();
+        startMinerBtn.disabled = false;
+    });
+    if (stopMinerBtn) stopMinerBtn.addEventListener('click', async () => {
+        stopMinerBtn.disabled = true;
+        await stopMiner();
+        stopMinerBtn.disabled = false;
+    });
+    if (claimMinerBtn) claimMinerBtn.addEventListener('click', async () => {
+        claimMinerBtn.disabled = true;
+        await claimMiner();
+        claimMinerBtn.disabled = false;
+    });
 }
 
 // call setupAuthUI after DOM ready
 document.addEventListener('DOMContentLoaded', () => setupAuthUI());
+
+// --- Miner client functions ---
+function getAuthHeaders() {
+    const token = localStorage.getItem('token');
+    return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
+
+async function refreshMinerStatus() {
+    try {
+        const res = await fetch('/api/miner/status', { headers: getAuthHeaders() });
+        if (!res.ok) return;
+        const json = await res.json();
+        updateMinerUI(json);
+    } catch (err) {
+        console.error('Miner status error', err);
+    }
+}
+
+function updateMinerUI(status) {
+    const minerBox = document.getElementById('minerBox');
+    if (!minerBox) return;
+    const walletBalance = document.getElementById('walletBalance');
+    const minerAccrued = document.getElementById('minerAccrued');
+    const minerHash = document.getElementById('minerHash');
+    const minerMessage = document.getElementById('minerMessage');
+
+    const wallet = status.wallet || { balance: 0 };
+    const miner = status.miner || { hash_rate: 1, is_active: false };
+    const accrued = status.accrued || 0;
+
+    walletBalance.textContent = Number(wallet.balance || 0).toFixed(6);
+    minerAccrued.textContent = Number(accrued || 0).toFixed(6);
+    minerHash.textContent = Number(miner.hash_rate || 1).toFixed(2);
+    minerMessage.textContent = miner.is_active ? 'Miner running' : 'Miner stopped';
+
+    // show miner box
+    minerBox.style.display = 'block';
+}
+
+async function startMiner() {
+    try {
+        const res = await fetch('/api/miner/start', { method: 'POST', headers: getAuthHeaders() });
+        if (!res.ok) {
+            const j = await res.json();
+            document.getElementById('minerMessage').textContent = j.error || 'Failed to start';
+            return;
+        }
+        document.getElementById('minerMessage').textContent = 'Miner started';
+        await refreshMinerStatus();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function stopMiner() {
+    try {
+        const res = await fetch('/api/miner/stop', { method: 'POST', headers: getAuthHeaders() });
+        const j = await res.json();
+        if (!res.ok) {
+            document.getElementById('minerMessage').textContent = j.error || 'Failed to stop';
+            return;
+        }
+        document.getElementById('minerMessage').textContent = `Stopped — accrued ${Number(j.accrued || 0).toFixed(6)}`;
+        await refreshMinerStatus();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function claimMiner() {
+    try {
+        const res = await fetch('/api/miner/claim', { method: 'POST', headers: getAuthHeaders() });
+        const j = await res.json();
+        if (!res.ok) {
+            document.getElementById('minerMessage').textContent = j.error || 'Claim failed';
+            return;
+        }
+        document.getElementById('minerMessage').textContent = `Claimed ${Number(j.accrued || 0).toFixed(6)}`;
+        await refreshMinerStatus();
+    } catch (err) {
+        console.error(err);
+    }
+}
 
     // Analyze crypto: volatility, avg return, max drawdown
     async function analyzeCrypto(cryptoId, days = 7) {
