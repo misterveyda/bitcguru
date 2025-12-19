@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Miner Monitor</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -36,13 +37,46 @@
             <!-- 24h Price Chart -->
             <section class="chart-section">
                 <h2>24h Price Change</h2>
+                <div class="chart-controls">
+                    <div class="timeframe-buttons" id="timeframeButtons">
+                        <button class="tf-btn" data-days="1">1D</button>
+                        <button class="tf-btn active" data-days="7">7D</button>
+                        <button class="tf-btn" data-days="30">30D</button>
+                        <button class="tf-btn" data-days="90">90D</button>
+                    </div>
+                </div>
+
+                <div class="chart-canvas">
+                    <canvas id="priceChart" height="120"></canvas>
+                </div>
                 <div class="chart-container" id="chartContainer"></div>
             </section>
 
             <!-- Refresh Control -->
             <section class="controls">
                 <button class="refresh-btn" id="refreshBtn">🔄 Refresh Data</button>
+                <button class="analyze-btn" id="analyzeBtn">🔎 Analyze Selected</button>
                 <p class="last-update" id="lastUpdate">Last updated: --:-- --</p>
+                <div class="analysis-results" id="analysisResults"></div>
+            </section>
+
+            <!-- Educative Cards -->
+            <section class="edu-section">
+                <h2>Learning: How Mining & Networks Work</h2>
+                <div class="edu-cards" id="eduCards">
+                    <div class="edu-card">
+                        <h3>What is Mining?</h3>
+                        <p>Mining is the process of validating transactions and securing a blockchain by solving cryptographic puzzles. Successful miners earn rewards.</p>
+                    </div>
+                    <div class="edu-card">
+                        <h3>Proof of Work vs Proof of Stake</h3>
+                        <p>Proof of Work uses computational work to secure the network; Proof of Stake selects validators by stake size, using much less energy.</p>
+                    </div>
+                    <div class="edu-card">
+                        <h3>Hashrate & Difficulty</h3>
+                        <p>Hashrate measures computational power. Difficulty adjusts to keep block times steady — higher difficulty means harder mining.</p>
+                    </div>
+                </div>
             </section>
         </div>
     </div>
