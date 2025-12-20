@@ -1,3 +1,20 @@
+const API_BASE = 'https://api.coingecko.com/api/v3';
+const BACKEND_BASE = (typeof window !== 'undefined' && (window.BACKEND_BASE || window.__BACKEND_BASE__)) || '';
+const BACKEND_API = (BACKEND_BASE ? `${BACKEND_BASE}/api` : '/api');
+
+document.addEventListener('DOMContentLoaded', () => {
+  const pingBtn = document.getElementById('refreshBtn');
+  const lastUpdate = document.getElementById('lastUpdate');
+  pingBtn.addEventListener('click', async () => {
+    try {
+      const res = await fetch(`${BACKEND_API}/ping`);
+      const json = await res.json();
+      lastUpdate.textContent = `Backend: ${json.ok ? 'online' : 'offline'} @ ${new Date(json.time).toLocaleTimeString()}`;
+    } catch (err) {
+      lastUpdate.textContent = 'Backend unreachable';
+    }
+  });
+});
 // Cleaned, single-scope enhanced script for the Crypto Miner Monitor
 // Top 5 cryptocurrencies to track
 const TOP_5_CRYPTOS = [
@@ -9,8 +26,8 @@ const TOP_5_CRYPTOS = [
 ];
 
 const API_BASE = 'https://api.coingecko.com/api/v3';
-// Backend deployed on Render
-const BACKEND_BASE = 'https://bitcguru.onrender.com';
+// Backend deployed on Render. Allow runtime override with window.BACKEND_BASE
+const BACKEND_BASE = (typeof window !== 'undefined' && (window.BACKEND_BASE || window.__BACKEND_BASE__)) || 'https://bitcguru.onrender.com';
 const BACKEND_API = `${BACKEND_BASE}/api`;
 let selectedCrypto = null;
 let cryptoData = {};

@@ -1,0 +1,9 @@
+{
+  "name": "bitcguru-docs",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/inject-backend.js"
+  },
+  "dependencies": {}
+}

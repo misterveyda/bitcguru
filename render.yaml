@@ -3,39 +3,21 @@ services:
     name: bitcguru-backend
     runtime: node
     buildCommand: cd server && npm install
-    startCommand: cd server && npm run migrate && npm start
+    startCommand: cd server && npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: "4000"
-      - key: DATABASE_HOST
-        fromDatabase:
-          name: bitcguru-db
-          property: host
-      - key: DATABASE_PORT
-        fromDatabase:
-          name: bitcguru-db
-          property: port
-      - key: DATABASE_USER
-        fromDatabase:
-          name: bitcguru-db
-          property: user
-      - key: DATABASE_PASSWORD
-        fromDatabase:
-          name: bitcguru-db
-          property: password
-      - key: DATABASE_NAME
-        fromDatabase:
-          name: bitcguru-db
-          property: database
-      - key: JWT_SECRET
-        generateValue: true
+        value: "10000"
+      - key: CORS_ORIGIN
+        value: ""
 
-databases:
-  - name: bitcguru-db
-    databaseName: bitcguru_db
-    user: pguser
-    plan: free
-    region: oregon
-    ipAllowList: []
+  - type: static
+    name: bitcguru-frontend
+    env: static
+    buildCommand: cd docs && npm install && npm run build
+    publishCommand: ""
+    publishPath: docs/dist
+    envVars:
+      - key: BACKEND_BASE
+        value: ""
