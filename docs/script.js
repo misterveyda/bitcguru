@@ -9,6 +9,9 @@ const TOP_5_CRYPTOS = [
 ];
 
 const API_BASE = 'https://api.coingecko.com/api/v3';
+// Backend deployed on Render
+const BACKEND_BASE = 'https://bitcguru.onrender.com';
+const BACKEND_API = `${BACKEND_BASE}/api`;
 let selectedCrypto = null;
 let cryptoData = {};
 let autoRefreshInterval = null;
@@ -414,7 +417,7 @@ function setupAuthUI() {
     const claimMinerBtn = document.getElementById('claimMinerBtn');
 
     registerBtn.addEventListener('click', async () => {
-        const res = await fetch('/api/auth/register', {
+        const res = await fetch(`${BACKEND_API}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: email.value, password: pass.value })
@@ -431,7 +434,7 @@ function setupAuthUI() {
     });
 
     loginBtn.addEventListener('click', async () => {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch(`${BACKEND_API}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: email.value, password: pass.value })
@@ -499,7 +502,7 @@ function getAuthHeaders() {
 
 async function refreshMinerStatus() {
     try {
-        const res = await fetch('/api/miner/status', { headers: getAuthHeaders() });
+        const res = await fetch(`${BACKEND_API}/miner/status`, { headers: getAuthHeaders() });
         if (!res.ok) return;
         const json = await res.json();
         updateMinerUI(json);
@@ -531,7 +534,7 @@ function updateMinerUI(status) {
 
 async function startMiner() {
     try {
-        const res = await fetch('/api/miner/start', { method: 'POST', headers: getAuthHeaders() });
+        const res = await fetch(`${BACKEND_API}/miner/start`, { method: 'POST', headers: getAuthHeaders() });
         if (!res.ok) {
             const j = await res.json();
             document.getElementById('minerMessage').textContent = j.error || 'Failed to start';
@@ -546,7 +549,7 @@ async function startMiner() {
 
 async function stopMiner() {
     try {
-        const res = await fetch('/api/miner/stop', { method: 'POST', headers: getAuthHeaders() });
+        const res = await fetch(`${BACKEND_API}/miner/stop`, { method: 'POST', headers: getAuthHeaders() });
         const j = await res.json();
         if (!res.ok) {
             document.getElementById('minerMessage').textContent = j.error || 'Failed to stop';
@@ -561,7 +564,7 @@ async function stopMiner() {
 
 async function claimMiner() {
     try {
-        const res = await fetch('/api/miner/claim', { method: 'POST', headers: getAuthHeaders() });
+        const res = await fetch(`${BACKEND_API}/miner/claim`, { method: 'POST', headers: getAuthHeaders() });
         const j = await res.json();
         if (!res.ok) {
             document.getElementById('minerMessage').textContent = j.error || 'Claim failed';
