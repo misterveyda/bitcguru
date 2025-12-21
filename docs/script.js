@@ -16,11 +16,14 @@ let selectedDays = 7;
 /* ================================
    DOM ELEMENTS
 ================================ */
-const authSection = document.querySelector(".auth-section");
+const authSection = document.getElementById("authSection");
+const dashboard = document.getElementById("dashboard");
+
 const minerBox = document.getElementById("minerBox");
 const walletBalanceEl = document.getElementById("walletBalance");
 const hashRateEl = document.getElementById("minerHash");
 const accruedEl = document.getElementById("minerAccrued");
+const minerMessage = document.getElementById("minerMessage");
 
 const startBtn = document.getElementById("startMinerBtn");
 const stopBtn = document.getElementById("stopMinerBtn");
@@ -81,7 +84,8 @@ loginBtn?.addEventListener("click", () => {
 
 logoutBtn?.addEventListener("click", () => {
   localStorage.removeItem("token");
-  location.reload();
+  authSection.style.display = "block";
+  dashboard.style.display = "none";
 });
 
 /* ================================
@@ -89,20 +93,20 @@ logoutBtn?.addEventListener("click", () => {
 ================================ */
 function showDashboard() {
   authSection.style.display = "none";
-  minerBox.style.display = "block";
-  logoutBtn.style.display = "inline-block";
+  dashboard.style.display = "block";
   refreshMinerStatus();
+  createCoinButtons();
   loadCoinData();
 }
 
-/* ================================
-   MINER
-================================ */
 function toggleMiningUI(active) {
   startBtn.disabled = active;
   stopBtn.disabled = !active;
 }
 
+/* ================================
+   MINER
+================================ */
 async function refreshMinerStatus() {
   try {
     const data = await api("/miner/status");
@@ -111,28 +115,51 @@ async function refreshMinerStatus() {
     accruedEl.textContent = data.accrued.toFixed(8);
     mining = data.miner.is_active;
     toggleMiningUI(mining);
-  } catch (err) { console.error(err.message); }
+  } catch (err) {
+    console.error(err.message);
+  }
+}
+
+function setMinerMessage(msg, type="info") {
+  minerMessage.textContent = msg;
+  minerMessage.style.color = type === "error" ? "#ff4444" : "#00ff41";
+  setTimeout(()=>minerMessage.textContent="", 2000);
 }
 
 startBtn?.addEventListener("click", async () => {
   startBtn.disabled = true;
-  await api("/miner/start", { method: "POST" });
-  mining = true;
-  toggleMiningUI(true);
+  try {
+    await api("/miner/start", { method: "POST" });
+    mining = true;
+    toggleMiningUI(true);
+    setMinerMessage("Mining started!");
+  } catch(err) {
+    setMinerMessage(err.message, "error");
+  } finally { startBtn.disabled = false; }
 });
 
 stopBtn?.addEventListener("click", async () => {
   stopBtn.disabled = true;
-  const data = await api("/miner/stop", { method: "POST" });
-  accruedEl.textContent = data.accrued.toFixed(8);
-  mining = false;
-  toggleMiningUI(false);
+  try {
+    const data = await api("/miner/stop", { method: "POST" });
+    accruedEl.textContent = data.accrued.toFixed(8);
+    mining = false;
+    toggleMiningUI(false);
+    setMinerMessage("Mining stopped!");
+  } catch(err) {
+    setMinerMessage(err.message, "error");
+  } finally { stopBtn.disabled = false; }
 });
 
 claimBtn?.addEventListener("click", async () => {
   claimBtn.disabled = true;
-  await api("/miner/claim", { method: "POST" });
-  refreshMinerStatus();
+  try {
+    await api("/miner/claim", { method: "POST" });
+    refreshMinerStatus();
+    setMinerMessage("Rewards claimed!");
+  } catch(err) {
+    setMinerMessage(err.message, "error");
+  } finally { claimBtn.disabled = false; }
 });
 
 /* ================================
@@ -145,32 +172,25 @@ function sampleData(arr, maxPoints = 50) {
 
 async function loadCoinData() {
   try {
-    const prices = await fetch(
-      `${API_BASE}/coins/${selectedCoin}/market_chart?vs_currency=usd&days=${selectedDays}`
-    ).then(r => r.json());
-
+    const prices = await fetch(`${API_BASE}/coins/${selectedCoin}/market_chart?vs_currency=usd&days=${selectedDays}`).then(r => r.json());
     let labels = prices.prices.map(p => new Date(p[0]).toLocaleDateString());
     let values = prices.prices.map(p => p[1]);
-
     labels = sampleData(labels, 50);
     values = sampleData(values, 50);
-
     renderChart(labels, values);
-  } catch (err) {
-    console.error("Error loading coin data:", err);
-  }
+  } catch (err) { console.error(err); }
 }
 
-function createCoinButtons(coins = ["bitcoin","ethereum","dogecoin"]) {
+function createCoinButtons(coins=["bitcoin","ethereum","dogecoin"]) {
   coinButtonsContainer.innerHTML = "";
-  coins.forEach(c => {
+  coins.forEach(c=>{
     const btn = document.createElement("button");
     btn.textContent = c.toUpperCase();
     btn.classList.add("crypto-btn");
-    if(c === selectedCoin) btn.classList.add("active");
-    btn.addEventListener("click", () => {
-      selectedCoin = c;
-      coinButtonsContainer.querySelectorAll(".crypto-btn").forEach(b => b.classList.remove("active"));
+    if(c===selectedCoin) btn.classList.add("active");
+    btn.addEventListener("click", ()=>{
+      selectedCoin=c;
+      coinButtonsContainer.querySelectorAll(".crypto-btn").forEach(b=>b.classList.remove("active"));
       btn.classList.add("active");
       loadCoinData();
     });
@@ -181,10 +201,10 @@ function createCoinButtons(coins = ["bitcoin","ethereum","dogecoin"]) {
 /* ================================
    TIMEFRAME BUTTONS
 ================================ */
-timeframeButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
+timeframeButtons.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
     selectedDays = btn.dataset.days;
-    timeframeButtons.forEach(b => b.classList.remove("active"));
+    timeframeButtons.forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
     loadCoinData();
   });
@@ -193,17 +213,17 @@ timeframeButtons.forEach(btn => {
 /* ================================
    CHARTS
 ================================ */
-function renderChart(labels, data) {
-  if (charts.price) charts.price.destroy();
-  charts.price = new Chart(chartCanvas, {
-    type: "line",
-    data: { labels, datasets: [{ label: "Price (USD)", data, tension: 0.3 }] },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 0 },
-      plugins: { tooltip: { mode: 'index', intersect: false } },
-      scales: { x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } } }
+function renderChart(labels,data){
+  if(charts.price) charts.price.destroy();
+  charts.price = new Chart(chartCanvas,{
+    type:"line",
+    data:{labels,datasets:[{label:"Price (USD)",data,tension:0.3}]},
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:{duration:0},
+      plugins:{tooltip:{mode:"index",intersect:false}},
+      scales:{x:{ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:10}}}
     }
   });
 }
@@ -211,14 +231,13 @@ function renderChart(labels, data) {
 /* ================================
    INIT
 ================================ */
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded",async()=>{
   const token = localStorage.getItem("token");
-  createCoinButtons();
-  if (token) {
-    try {
+  if(token){
+    try{
       await api("/ping");
       showDashboard();
-    } catch {
+    } catch{
       localStorage.removeItem("token");
     }
   }
