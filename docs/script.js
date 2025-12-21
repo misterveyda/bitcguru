@@ -1,69 +1,63 @@
 /* ================================
    CONFIG
 ================================ */
+const API_BASE = "https://api.coingecko.com/api/v3";
 const BACKEND_BASE = window.BACKEND_BASE || "https://btcguru.onrender.com";
 const BACKEND_API = `${BACKEND_BASE}/api`;
-const API_COINGECKO = "https://api.coingecko.com/api/v3";
 
 /* ================================
    STATE
 ================================ */
 let mining = false;
-let selectedCoin = "bitcoin";
 let charts = {};
+let selectedCoin = "bitcoin";
+let selectedDays = 7; // default 7D
 
 /* ================================
    DOM ELEMENTS
 ================================ */
-const emailInput = document.getElementById("emailInput");
-const passwordInput = document.getElementById("passwordInput");
+const authSection = document.querySelector(".auth-section");
+const minerBox = document.getElementById("minerBox");
+const walletBalanceEl = document.getElementById("walletBalance");
+const hashRateEl = document.getElementById("minerHash");
+const accruedEl = document.getElementById("minerAccrued");
+
+const startBtn = document.getElementById("startMinerBtn");
+const stopBtn = document.getElementById("stopMinerBtn");
+const claimBtn = document.getElementById("claimMinerBtn");
+
 const registerBtn = document.getElementById("registerBtn");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 
-const authSection = document.getElementById("authSection");
-const dashboard = document.getElementById("dashboard");
-const minerBox = document.getElementById("minerBox");
-
-const walletBalanceEl = document.getElementById("walletBalance");
-const minerHashEl = document.getElementById("minerHash");
-const minerAccruedEl = document.getElementById("minerAccrued");
-
-const startMinerBtn = document.getElementById("startMinerBtn");
-const stopMinerBtn = document.getElementById("stopMinerBtn");
-const claimMinerBtn = document.getElementById("claimMinerBtn");
-
-const coinSelect = document.getElementById("coinSelect");
+const coinButtonsContainer = document.getElementById("cryptoButtons");
 const chartCanvas = document.getElementById("priceChart");
+const timeframeButtons = document.querySelectorAll(".tf-btn");
 
 /* ================================
    API HELPER
 ================================ */
 async function api(path, options = {}) {
   const token = localStorage.getItem("token");
+
   const res = await fetch(`${BACKEND_API}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` })
-    },
+    headers: { "Content-Type": "application/json", ...(token && { Authorization: `Bearer ${token}` }) },
     ...options
   });
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
+    let err;
+    try { err = await res.json(); } catch { err = {}; }
     throw new Error(err.error || "API request failed");
   }
+
   return res.json();
 }
 
 /* ================================
    AUTH
 ================================ */
-async function handleAuth(type) {
-  const email = emailInput.value;
-  const password = passwordInput.value;
-
-  if (!email || !password) return alert("Enter email & password");
-
+async function handleAuth(email, password, type) {
   try {
     const data = await api(`/auth/${type}`, {
       method: "POST",
@@ -76,106 +70,144 @@ async function handleAuth(type) {
   }
 }
 
-registerBtn.addEventListener("click", () => handleAuth("register"));
-loginBtn.addEventListener("click", () => handleAuth("login"));
-logoutBtn.addEventListener("click", () => {
+registerBtn?.addEventListener("click", () => {
+  const email = document.getElementById("emailInput").value;
+  const password = document.getElementById("passwordInput").value;
+  handleAuth(email, password, "register");
+});
+
+loginBtn?.addEventListener("click", () => {
+  const email = document.getElementById("emailInput").value;
+  const password = document.getElementById("passwordInput").value;
+  handleAuth(email, password, "login");
+});
+
+logoutBtn?.addEventListener("click", () => {
   localStorage.removeItem("token");
   location.reload();
 });
 
 /* ================================
-   DASHBOARD
+   UI STATE
 ================================ */
 function showDashboard() {
   authSection.style.display = "none";
-  dashboard.style.display = "block";
   minerBox.style.display = "block";
   logoutBtn.style.display = "inline-block";
   refreshMinerStatus();
   loadCoinData();
 }
 
-function toggleMiningUI(active) {
-  startMinerBtn.disabled = active;
-  stopMinerBtn.disabled = !active;
-}
-
 /* ================================
    MINER
 ================================ */
+function toggleMiningUI(active) {
+  startBtn.disabled = active;
+  stopBtn.disabled = !active;
+}
+
 async function refreshMinerStatus() {
   try {
     const data = await api("/miner/status");
     walletBalanceEl.textContent = data.wallet.balance.toFixed(8);
-    minerHashEl.textContent = data.miner.hash_rate;
-    minerAccruedEl.textContent = data.accrued.toFixed(8);
+    hashRateEl.textContent = data.miner.hash_rate;
+    accruedEl.textContent = data.accrued.toFixed(8);
     mining = data.miner.is_active;
     toggleMiningUI(mining);
-  } catch (err) {
-    console.error(err.message);
-  }
+  } catch (err) { console.error(err.message); }
 }
 
-startMinerBtn.addEventListener("click", async () => {
+startBtn?.addEventListener("click", async () => {
   await api("/miner/start", { method: "POST" });
   mining = true;
   toggleMiningUI(true);
 });
 
-stopMinerBtn.addEventListener("click", async () => {
+stopBtn?.addEventListener("click", async () => {
   const data = await api("/miner/stop", { method: "POST" });
-  minerAccruedEl.textContent = data.accrued.toFixed(8);
+  accruedEl.textContent = data.accrued.toFixed(8);
   mining = false;
   toggleMiningUI(false);
 });
 
-claimMinerBtn.addEventListener("click", async () => {
+claimBtn?.addEventListener("click", async () => {
   await api("/miner/claim", { method: "POST" });
   refreshMinerStatus();
 });
 
 /* ================================
-   COINGECKO
+   COIN DATA
 ================================ */
+// Sample function to reduce points and avoid lag
+function sampleData(arr, maxPoints = 50) {
+  const step = Math.ceil(arr.length / maxPoints);
+  return arr.filter((_, i) => i % step === 0);
+}
+
 async function loadCoinData() {
   try {
-    const res = await fetch(`${API_COINGECKO}/coins/${selectedCoin}/market_chart?vs_currency=usd&days=7`);
-    const prices = await res.json();
+    const prices = await fetch(
+      `${API_BASE}/coins/${selectedCoin}/market_chart?vs_currency=usd&days=${selectedDays}`
+    ).then(r => r.json());
 
-    const labels = prices.prices.map(p => new Date(p[0]).toLocaleDateString());
-    const data = prices.prices.map(p => p[1]);
+    let labels = prices.prices.map(p => new Date(p[0]).toLocaleDateString());
+    let values = prices.prices.map(p => p[1]);
 
-    renderChart(labels, data);
+    labels = sampleData(labels, 50);
+    values = sampleData(values, 50);
+
+    renderChart(labels, values);
   } catch (err) {
-    console.error("CoinGecko fetch error:", err.message);
+    console.error("Error loading coin data:", err);
   }
 }
 
-coinSelect.addEventListener("change", e => {
-  selectedCoin = e.target.value;
-  loadCoinData();
+/* Coin selection (dynamic buttons) */
+function createCoinButtons(coins = ["bitcoin","ethereum","dogecoin"]) {
+  coinButtonsContainer.innerHTML = "";
+  coins.forEach(c => {
+    const btn = document.createElement("button");
+    btn.textContent = c.toUpperCase();
+    btn.classList.add("crypto-btn");
+    if(c === selectedCoin) btn.classList.add("active");
+    btn.addEventListener("click", () => {
+      selectedCoin = c;
+      coinButtonsContainer.querySelectorAll(".crypto-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      loadCoinData();
+    });
+    coinButtonsContainer.appendChild(btn);
+  });
+}
+
+/* ================================
+   TIMEFRAME BUTTONS
+================================ */
+timeframeButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    selectedDays = btn.dataset.days;
+    timeframeButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    loadCoinData();
+  });
 });
 
 /* ================================
-   CHART
+   CHARTS
 ================================ */
 function renderChart(labels, data) {
   if (charts.price) charts.price.destroy();
+
   charts.price = new Chart(chartCanvas, {
     type: "line",
     data: {
       labels,
-      datasets: [{
-        label: `${selectedCoin} Price (USD)`,
-        data,
-        borderColor: "#ffd700",
-        backgroundColor: "rgba(255, 215, 0, 0.2)",
-        tension: 0.3
-      }]
+      datasets: [{ label: "Price (USD)", data, tension: 0.3 }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      animation: { duration: 0 }
     }
   });
 }
@@ -185,6 +217,8 @@ function renderChart(labels, data) {
 ================================ */
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
+  createCoinButtons(); // init coin buttons
+
   if (token) {
     try {
       await api("/ping");
