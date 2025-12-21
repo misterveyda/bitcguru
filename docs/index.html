@@ -1,120 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Miner Monitor</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Miner Monitor</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>⛏️ Crypto Miner Monitor</h1>
-            <p>Track the top cryptocurrencies in real-time</p>
-        </header>
+  <div class="container">
+    <header class="header">
+      <h1>⛏️ Crypto Miner Monitor</h1>
+      <p>Track the top cryptocurrencies in real-time</p>
+    </header>
 
-        <!-- Auth UI -->
-        <section class="auth-section">
-            <div class="auth-container">
-                <div class="auth-box">
-                    <input id="emailInput" type="email" placeholder="Email" />
-                    <input id="passwordInput" type="password" placeholder="Password" />
-                    <div class="auth-actions">
-                        <button id="registerBtn">Register</button>
-                        <button id="loginBtn">Login</button>
-                        <button id="logoutBtn" style="display:none">Logout</button>
-                    </div>
-                    <p id="authMessage" class="auth-message"></p>
-                </div>
-
-                <!-- Virtual Miner / Wallet -->
-                <div class="miner-box" id="minerBox" style="display:none">
-                    <h3>Your Virtual Miner</h3>
-                    <p>Balance: <span id="walletBalance">0</span></p>
-                    <p>Accrued (unclaimed): <span id="minerAccrued">0</span></p>
-                    <p>Hash Rate: <span id="minerHash">1.0</span> H/s</p>
-                    <div class="miner-actions">
-                        <button id="startMinerBtn">Start Miner</button>
-                        <button id="stopMinerBtn">Stop Miner</button>
-                        <button id="claimMinerBtn">Claim Rewards</button>
-                    </div>
-                    <p id="minerMessage" class="auth-message"></p>
-                </div>
-            </div>
-        </section>
-
-        <div class="main-content">
-            <!-- Crypto Selection -->
-            <section class="crypto-selector">
-                <h2>Select a Cryptocurrency</h2>
-                <div class="crypto-buttons" id="cryptoButtons"></div>
-            </section>
-
-            <!-- Selected Crypto Details -->
-            <section class="crypto-details">
-                <div class="details-card" id="detailsCard">
-                    <div class="placeholder">Select a cryptocurrency to view details</div>
-                </div>
-            </section>
-
-            <!-- Live Market Stats -->
-            <section class="market-stats">
-                <h2>Market Overview</h2>
-                <div class="stats-grid" id="statsGrid"></div>
-            </section>
-
-            <!-- 24h Price Chart -->
-            <section class="chart-section">
-                <h2>24h Price Change</h2>
-                <div class="chart-controls">
-                    <div class="timeframe-buttons" id="timeframeButtons">
-                        <button class="tf-btn" data-days="1">1D</button>
-                        <button class="tf-btn active" data-days="7">7D</button>
-                        <button class="tf-btn" data-days="30">30D</button>
-                        <button class="tf-btn" data-days="90">90D</button>
-                    </div>
-                </div>
-
-                <div class="chart-canvas">
-                    <canvas id="priceChart" height="120"></canvas>
-                </div>
-                <div class="chart-container" id="chartContainer"></div>
-            </section>
-
-            <!-- Refresh Control -->
-            <section class="controls">
-                <button class="refresh-btn" id="refreshBtn">🔄 Refresh Data</button>
-                <button class="analyze-btn" id="analyzeBtn">🔎 Analyze Selected</button>
-                <p class="last-update" id="lastUpdate">Last updated: --:-- --</p>
-                <div class="analysis-results" id="analysisResults"></div>
-            </section>
-
-            <!-- Educative Cards -->
-            <section class="edu-section">
-                <h2>Learning: How Mining & Networks Work</h2>
-                <div class="edu-cards" id="eduCards">
-                    <div class="edu-card">
-                        <h3>What is Mining?</h3>
-                        <p>Mining is the process of validating transactions and securing a blockchain by solving cryptographic puzzles. Successful miners earn rewards.</p>
-                    </div>
-                    <div class="edu-card">
-                        <h3>Proof of Work vs Proof of Stake</h3>
-                        <p>Proof of Work uses computational work to secure the network; Proof of Stake selects validators by stake size, using much less energy.</p>
-                    </div>
-                    <div class="edu-card">
-                        <h3>Hashrate & Difficulty</h3>
-                        <p>Hashrate measures computational power. Difficulty adjusts to keep block times steady — higher difficulty means harder mining.</p>
-                    </div>
-                </div>
-            </section>
+    <!-- Auth Section -->
+    <section class="auth-section" id="authSection">
+      <div class="auth-container">
+        <div class="auth-box">
+          <input id="emailInput" type="email" placeholder="Email" />
+          <input id="passwordInput" type="password" placeholder="Password" />
+          <div class="auth-actions">
+            <button id="registerBtn">Register</button>
+            <button id="loginBtn">Login</button>
+            <button id="logoutBtn" style="display:none">Logout</button>
+          </div>
+          <p id="authMessage" class="auth-message"></p>
         </div>
-    </div>
 
-    <script>
-      window.BACKEND_BASE = "https://btcguru.onrender.com";
-    </script>
-    <script src="script.js"></script>
+        <!-- Miner Box -->
+        <div class="miner-box" id="minerBox" style="display:none">
+          <h3>Your Virtual Miner</h3>
+          <p>Balance: <span id="walletBalance">0</span></p>
+          <p>Accrued (unclaimed): <span id="minerAccrued">0</span></p>
+          <p>Hash Rate: <span id="minerHash">1.0</span> H/s</p>
+          <div class="miner-actions">
+            <button id="startMinerBtn">Start Miner</button>
+            <button id="stopMinerBtn">Stop Miner</button>
+            <button id="claimMinerBtn">Claim Rewards</button>
+          </div>
+          <p id="minerMessage" class="auth-message"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="main-content" id="dashboard" style="display:none">
+      <!-- Coin Selector -->
+      <section class="crypto-selector">
+        <h2>Select a Cryptocurrency</h2>
+        <select id="coinSelect">
+          <option value="bitcoin">Bitcoin</option>
+          <option value="ethereum">Ethereum</option>
+          <option value="dogecoin">Dogecoin</option>
+          <option value="litecoin">Litecoin</option>
+        </select>
+      </section>
+
+      <!-- Chart Section -->
+      <section class="chart-section">
+        <h2>24h Price Chart</h2>
+        <canvas id="priceChart" height="200"></canvas>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    window.BACKEND_BASE = "https://btcguru.onrender.com";
+  </script>
+  <script src="script.js"></script>
 </body>
 </html>
-
