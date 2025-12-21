@@ -111,11 +111,10 @@
         </div>
     </div>
 
-        <script>
-            // runtime backend override (build will inject proper value)
-            window.BACKEND_BASE = window.BACKEND_BASE || '';
-        </script>
-        <script src="script.js"></script>
+    <script>
+      window.BACKEND_BASE = "https://YOUR-RENDER-URL.onrender.com";
+    </script>
+    <script src="script.js"></script>
 </body>
 </html>
 
