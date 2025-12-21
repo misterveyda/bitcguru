@@ -14,40 +14,38 @@
       <p>Track the top cryptocurrencies in real-time</p>
     </header>
 
-    <!-- Auth Section -->
+    <!-- AUTH SECTION -->
     <section class="auth-section" id="authSection">
-      <div class="auth-container">
-        <div class="auth-box">
-          <input id="emailInput" type="email" placeholder="Email" />
-          <input id="passwordInput" type="password" placeholder="Password" />
-          <div class="auth-actions">
-            <button id="registerBtn">Register</button>
-            <button id="loginBtn">Login</button>
-            <button id="logoutBtn" style="display:none">Logout</button>
-          </div>
-          <p id="authMessage" class="auth-message"></p>
+      <div class="auth-box">
+        <input id="emailInput" type="email" placeholder="Email" />
+        <input id="passwordInput" type="password" placeholder="Password" />
+        <div class="auth-actions">
+          <button id="registerBtn">Register</button>
+          <button id="loginBtn">Login</button>
+          <button id="logoutBtn" style="display:none">Logout</button>
         </div>
-
-        <!-- Miner Box -->
-        <div class="miner-box" id="minerBox" style="display:none">
-          <h3>Your Virtual Miner</h3>
-          <p>Balance: <span id="walletBalance">0</span></p>
-          <p>Accrued (unclaimed): <span id="minerAccrued">0</span></p>
-          <p>Hash Rate: <span id="minerHash">1.0</span> H/s</p>
-          <div class="miner-actions">
-            <button id="startMinerBtn">Start Miner</button>
-            <button id="stopMinerBtn">Stop Miner</button>
-            <button id="claimMinerBtn">Claim Rewards</button>
-          </div>
-          <p id="minerMessage" class="auth-message"></p>
-        </div>
+        <p id="authMessage" class="auth-message"></p>
       </div>
     </section>
 
-    <!-- Main Content -->
-    <div class="main-content" id="dashboard" style="display:none">
+    <!-- DASHBOARD -->
+    <div class="dashboard" id="dashboard" style="display:none">
+      <!-- Miner Box -->
+      <div class="miner-box" id="minerBox">
+        <h3>Your Virtual Miner</h3>
+        <p>Balance: <span id="walletBalance">0</span></p>
+        <p>Accrued (unclaimed): <span id="minerAccrued">0</span></p>
+        <p>Hash Rate: <span id="minerHash">1.0</span> H/s</p>
+        <div class="miner-actions">
+          <button id="startMinerBtn">Start Miner</button>
+          <button id="stopMinerBtn">Stop Miner</button>
+          <button id="claimMinerBtn">Claim Rewards</button>
+        </div>
+        <p id="minerMessage" class="auth-message"></p>
+      </div>
+
       <!-- Coin Selector -->
-      <section class="crypto-selector">
+      <div class="crypto-selector">
         <h2>Select a Cryptocurrency</h2>
         <select id="coinSelect">
           <option value="bitcoin">Bitcoin</option>
@@ -55,13 +53,13 @@
           <option value="dogecoin">Dogecoin</option>
           <option value="litecoin">Litecoin</option>
         </select>
-      </section>
+      </div>
 
       <!-- Chart Section -->
-      <section class="chart-section">
-        <h2>24h Price Chart</h2>
+      <div class="chart-section">
+        <h2>Price Chart (7 days)</h2>
         <canvas id="priceChart" height="200"></canvas>
-      </section>
+      </div>
     </div>
   </div>
 
