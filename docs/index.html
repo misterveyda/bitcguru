@@ -15,7 +15,7 @@
     </header>
 
     <!-- Auth Section -->
-    <section class="auth-section">
+    <section class="auth-section" id="authSection">
       <div class="auth-container">
         <div class="auth-box">
           <input id="emailInput" type="email" placeholder="Email" />
@@ -23,47 +23,51 @@
           <div class="auth-actions">
             <button id="registerBtn">Register</button>
             <button id="loginBtn">Login</button>
-            <button id="logoutBtn" style="display:none">Logout</button>
           </div>
           <p id="authMessage" class="auth-message"></p>
         </div>
+      </div>
+    </section>
 
-        <!-- Miner Box -->
-        <div class="miner-box" id="minerBox" style="display:none">
+    <!-- Dashboard Section -->
+    <section class="dashboard" id="dashboard" style="display:none;">
+      <div class="miner-box" id="minerBox">
+        <div class="miner-header">
           <h3>Your Virtual Miner</h3>
-          <p>Balance: <span id="walletBalance">0</span></p>
-          <p>Accrued (unclaimed): <span id="minerAccrued">0</span></p>
-          <p>Hash Rate: <span id="minerHash">1.0</span> H/s</p>
-          <div class="miner-actions">
-            <button id="startMinerBtn">Start Miner</button>
-            <button id="stopMinerBtn">Stop Miner</button>
-            <button id="claimMinerBtn">Claim Rewards</button>
+          <button id="logoutBtn" class="logout-btn">Logout</button>
+        </div>
+        <p>Balance: <span id="walletBalance">0</span></p>
+        <p>Accrued (unclaimed): <span id="minerAccrued">0</span></p>
+        <p>Hash Rate: <span id="minerHash">1.0</span> H/s</p>
+        <div class="miner-actions">
+          <button id="startMinerBtn">Start Miner</button>
+          <button id="stopMinerBtn">Stop Miner</button>
+          <button id="claimMinerBtn">Claim Rewards</button>
+        </div>
+        <p id="minerMessage" class="auth-message"></p>
+      </div>
+
+      <!-- Coin Selection -->
+      <section class="crypto-selector">
+        <h2>Select Cryptocurrency</h2>
+        <div class="crypto-buttons" id="cryptoButtons"></div>
+      </section>
+
+      <!-- Chart Section -->
+      <section class="chart-section">
+        <h2>Price Chart</h2>
+        <div class="chart-controls">
+          <div class="timeframe-buttons">
+            <button class="tf-btn active" data-days="1">1D</button>
+            <button class="tf-btn" data-days="7">7D</button>
+            <button class="tf-btn" data-days="30">30D</button>
+            <button class="tf-btn" data-days="90">90D</button>
           </div>
-          <p id="minerMessage" class="auth-message"></p>
         </div>
-      </div>
-    </section>
-
-    <!-- Crypto Buttons -->
-    <section class="crypto-selector">
-      <h2>Select Cryptocurrency</h2>
-      <div class="crypto-buttons" id="cryptoButtons"></div>
-    </section>
-
-    <!-- Chart Section -->
-    <section class="chart-section">
-      <h2>Price Chart</h2>
-      <div class="chart-controls">
-        <div class="timeframe-buttons">
-          <button class="tf-btn active" data-days="1">1D</button>
-          <button class="tf-btn" data-days="7">7D</button>
-          <button class="tf-btn" data-days="30">30D</button>
-          <button class="tf-btn" data-days="90">90D</button>
+        <div class="chart-canvas">
+          <canvas id="priceChart"></canvas>
         </div>
-      </div>
-      <div class="chart-canvas">
-        <canvas id="priceChart" height="150"></canvas>
-      </div>
+      </section>
     </section>
   </div>
 
