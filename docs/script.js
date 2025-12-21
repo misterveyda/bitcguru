@@ -11,7 +11,7 @@ const BACKEND_API = `${BACKEND_BASE}/api`;
 let mining = false;
 let charts = {};
 let selectedCoin = "bitcoin";
-let selectedDays = 7; // default 7D
+let selectedDays = 7;
 
 /* ================================
    DOM ELEMENTS
@@ -39,18 +39,15 @@ const timeframeButtons = document.querySelectorAll(".tf-btn");
 ================================ */
 async function api(path, options = {}) {
   const token = localStorage.getItem("token");
-
   const res = await fetch(`${BACKEND_API}${path}`, {
     headers: { "Content-Type": "application/json", ...(token && { Authorization: `Bearer ${token}` }) },
     ...options
   });
-
   if (!res.ok) {
     let err;
     try { err = await res.json(); } catch { err = {}; }
     throw new Error(err.error || "API request failed");
   }
-
   return res.json();
 }
 
@@ -66,7 +63,7 @@ async function handleAuth(email, password, type) {
     localStorage.setItem("token", data.token);
     showDashboard();
   } catch (err) {
-    alert(err.message);
+    document.getElementById("authMessage").textContent = err.message;
   }
 }
 
@@ -118,12 +115,14 @@ async function refreshMinerStatus() {
 }
 
 startBtn?.addEventListener("click", async () => {
+  startBtn.disabled = true;
   await api("/miner/start", { method: "POST" });
   mining = true;
   toggleMiningUI(true);
 });
 
 stopBtn?.addEventListener("click", async () => {
+  stopBtn.disabled = true;
   const data = await api("/miner/stop", { method: "POST" });
   accruedEl.textContent = data.accrued.toFixed(8);
   mining = false;
@@ -131,6 +130,7 @@ stopBtn?.addEventListener("click", async () => {
 });
 
 claimBtn?.addEventListener("click", async () => {
+  claimBtn.disabled = true;
   await api("/miner/claim", { method: "POST" });
   refreshMinerStatus();
 });
@@ -138,7 +138,6 @@ claimBtn?.addEventListener("click", async () => {
 /* ================================
    COIN DATA
 ================================ */
-// Sample function to reduce points and avoid lag
 function sampleData(arr, maxPoints = 50) {
   const step = Math.ceil(arr.length / maxPoints);
   return arr.filter((_, i) => i % step === 0);
@@ -162,7 +161,6 @@ async function loadCoinData() {
   }
 }
 
-/* Coin selection (dynamic buttons) */
 function createCoinButtons(coins = ["bitcoin","ethereum","dogecoin"]) {
   coinButtonsContainer.innerHTML = "";
   coins.forEach(c => {
@@ -197,17 +195,15 @@ timeframeButtons.forEach(btn => {
 ================================ */
 function renderChart(labels, data) {
   if (charts.price) charts.price.destroy();
-
   charts.price = new Chart(chartCanvas, {
     type: "line",
-    data: {
-      labels,
-      datasets: [{ label: "Price (USD)", data, tension: 0.3 }]
-    },
+    data: { labels, datasets: [{ label: "Price (USD)", data, tension: 0.3 }] },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: { duration: 0 }
+      animation: { duration: 0 },
+      plugins: { tooltip: { mode: 'index', intersect: false } },
+      scales: { x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } } }
     }
   });
 }
@@ -217,8 +213,7 @@ function renderChart(labels, data) {
 ================================ */
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
-  createCoinButtons(); // init coin buttons
-
+  createCoinButtons();
   if (token) {
     try {
       await api("/ping");
