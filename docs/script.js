@@ -1,49 +1,46 @@
 /* ================================
    CONFIG
 ================================ */
-const API_BASE = "https://api.coingecko.com/api/v3";
-
-// Runtime backend injection (GitHub Pages friendly)
-const BACKEND_BASE =
-  (typeof window !== "undefined" &&
-    (window.BACKEND_BASE || window.__BACKEND_BASE__)) ||
-  "https://bitcguru.onrender.com";
-
+const BACKEND_BASE = window.BACKEND_BASE || "https://btcguru.onrender.com";
 const BACKEND_API = `${BACKEND_BASE}/api`;
+const API_COINGECKO = "https://api.coingecko.com/api/v3";
 
 /* ================================
    STATE
 ================================ */
 let mining = false;
-let charts = {};
 let selectedCoin = "bitcoin";
+let charts = {};
 
 /* ================================
    DOM ELEMENTS
 ================================ */
-const authSection = document.getElementById("auth-section");
-const dashboardSection = document.getElementById("dashboard");
+const emailInput = document.getElementById("emailInput");
+const passwordInput = document.getElementById("passwordInput");
+const registerBtn = document.getElementById("registerBtn");
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 
-const loginForm = document.getElementById("login-form");
-const registerForm = document.getElementById("register-form");
+const authSection = document.getElementById("authSection");
+const dashboard = document.getElementById("dashboard");
+const minerBox = document.getElementById("minerBox");
 
-const walletBalanceEl = document.getElementById("wallet-balance");
-const hashRateEl = document.getElementById("hash-rate");
-const accruedEl = document.getElementById("accrued");
+const walletBalanceEl = document.getElementById("walletBalance");
+const minerHashEl = document.getElementById("minerHash");
+const minerAccruedEl = document.getElementById("minerAccrued");
 
-const startBtn = document.getElementById("start-mining");
-const stopBtn = document.getElementById("stop-mining");
-const claimBtn = document.getElementById("claim-rewards");
+const startMinerBtn = document.getElementById("startMinerBtn");
+const stopMinerBtn = document.getElementById("stopMinerBtn");
+const claimMinerBtn = document.getElementById("claimMinerBtn");
 
-const coinSelect = document.getElementById("coin-select");
-const chartCanvas = document.getElementById("price-chart");
+const coinSelect = document.getElementById("coinSelect");
+const chartCanvas = document.getElementById("priceChart");
 
 /* ================================
    API HELPER
 ================================ */
 async function api(path, options = {}) {
   const token = localStorage.getItem("token");
-
   const res = await fetch(`${BACKEND_API}${path}`, {
     headers: {
       "Content-Type": "application/json",
@@ -51,35 +48,27 @@ async function api(path, options = {}) {
     },
     ...options
   });
-
   if (!res.ok) {
-    let err;
-    try {
-      err = await res.json();
-    } catch {
-      err = {};
-    }
+    const err = await res.json().catch(() => ({}));
     throw new Error(err.error || "API request failed");
   }
-
   return res.json();
 }
 
 /* ================================
    AUTH
 ================================ */
-async function handleAuth(e, type) {
-  e.preventDefault();
+async function handleAuth(type) {
+  const email = emailInput.value;
+  const password = passwordInput.value;
 
-  const email = e.target.email.value;
-  const password = e.target.password.value;
+  if (!email || !password) return alert("Enter email & password");
 
   try {
     const data = await api(`/auth/${type}`, {
       method: "POST",
       body: JSON.stringify({ email, password })
     });
-
     localStorage.setItem("token", data.token);
     showDashboard();
   } catch (err) {
@@ -87,27 +76,28 @@ async function handleAuth(e, type) {
   }
 }
 
-loginForm?.addEventListener("submit", e => handleAuth(e, "login"));
-registerForm?.addEventListener("submit", e => handleAuth(e, "register"));
-
-function logout() {
+registerBtn.addEventListener("click", () => handleAuth("register"));
+loginBtn.addEventListener("click", () => handleAuth("login"));
+logoutBtn.addEventListener("click", () => {
   localStorage.removeItem("token");
   location.reload();
-}
+});
 
 /* ================================
-   UI STATE
+   DASHBOARD
 ================================ */
 function showDashboard() {
   authSection.style.display = "none";
-  dashboardSection.style.display = "block";
+  dashboard.style.display = "block";
+  minerBox.style.display = "block";
+  logoutBtn.style.display = "inline-block";
   refreshMinerStatus();
   loadCoinData();
 }
 
 function toggleMiningUI(active) {
-  startBtn.disabled = active;
-  stopBtn.disabled = !active;
+  startMinerBtn.disabled = active;
+  stopMinerBtn.disabled = !active;
 }
 
 /* ================================
@@ -116,11 +106,9 @@ function toggleMiningUI(active) {
 async function refreshMinerStatus() {
   try {
     const data = await api("/miner/status");
-
     walletBalanceEl.textContent = data.wallet.balance.toFixed(8);
-    hashRateEl.textContent = data.miner.hash_rate;
-    accruedEl.textContent = data.accrued.toFixed(8);
-
+    minerHashEl.textContent = data.miner.hash_rate;
+    minerAccruedEl.textContent = data.accrued.toFixed(8);
     mining = data.miner.is_active;
     toggleMiningUI(mining);
   } catch (err) {
@@ -128,62 +116,62 @@ async function refreshMinerStatus() {
   }
 }
 
-startBtn?.addEventListener("click", async () => {
+startMinerBtn.addEventListener("click", async () => {
   await api("/miner/start", { method: "POST" });
   mining = true;
   toggleMiningUI(true);
 });
 
-stopBtn?.addEventListener("click", async () => {
+stopMinerBtn.addEventListener("click", async () => {
   const data = await api("/miner/stop", { method: "POST" });
-  accruedEl.textContent = data.accrued.toFixed(8);
+  minerAccruedEl.textContent = data.accrued.toFixed(8);
   mining = false;
   toggleMiningUI(false);
 });
 
-claimBtn?.addEventListener("click", async () => {
+claimMinerBtn.addEventListener("click", async () => {
   await api("/miner/claim", { method: "POST" });
   refreshMinerStatus();
 });
 
 /* ================================
-   COINGECKO DATA
+   COINGECKO
 ================================ */
 async function loadCoinData() {
-  const prices = await fetch(
-    `${API_BASE}/coins/${selectedCoin}/market_chart?vs_currency=usd&days=7`
-  ).then(r => r.json());
+  try {
+    const res = await fetch(`${API_COINGECKO}/coins/${selectedCoin}/market_chart?vs_currency=usd&days=7`);
+    const prices = await res.json();
 
-  const labels = prices.prices.map(p =>
-    new Date(p[0]).toLocaleDateString()
-  );
-  const values = prices.prices.map(p => p[1]);
+    const labels = prices.prices.map(p => new Date(p[0]).toLocaleDateString());
+    const data = prices.prices.map(p => p[1]);
 
-  renderChart(labels, values);
+    renderChart(labels, data);
+  } catch (err) {
+    console.error("CoinGecko fetch error:", err.message);
+  }
 }
 
-coinSelect?.addEventListener("change", e => {
+coinSelect.addEventListener("change", e => {
   selectedCoin = e.target.value;
   loadCoinData();
 });
 
 /* ================================
-   CHARTS
+   CHART
 ================================ */
 function renderChart(labels, data) {
   if (charts.price) charts.price.destroy();
-
   charts.price = new Chart(chartCanvas, {
     type: "line",
     data: {
       labels,
-      datasets: [
-        {
-          label: "Price (USD)",
-          data,
-          tension: 0.3
-        }
-      ]
+      datasets: [{
+        label: `${selectedCoin} Price (USD)`,
+        data,
+        borderColor: "#ffd700",
+        backgroundColor: "rgba(255, 215, 0, 0.2)",
+        tension: 0.3
+      }]
     },
     options: {
       responsive: true,
@@ -197,13 +185,12 @@ function renderChart(labels, data) {
 ================================ */
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
-
   if (token) {
     try {
       await api("/ping");
       showDashboard();
     } catch {
-      logout();
+      localStorage.removeItem("token");
     }
   }
 });
