@@ -1,133 +1,18 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  color: #e0e0e0;
-  min-height: 100vh;
-  padding: 20px;
-}
-
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.header h1 {
-  font-size: 2.5em;
-  background: linear-gradient(135deg,#ffd700,#ffed4e);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.header p {
-  color: #a0a0a0;
-  margin-top: 8px;
-}
-
-/* AUTH BOX */
-.auth-section {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 30px;
-}
-
-.auth-box {
-  background: rgba(255,255,255,0.05);
-  padding: 20px;
-  border-radius: 10px;
-  width: 100%;
-  max-width: 350px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.auth-box input {
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: transparent;
-  color: #e0e0e0;
-}
-
-.auth-actions button {
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  background: #ffd700;
-  color: #1a1a2e;
-  cursor: pointer;
-  font-weight: bold;
-  margin-top: 5px;
-}
-
-.auth-actions button:hover {
-  background: #ffed4e;
-}
-
-/* DASHBOARD */
-.dashboard {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* MINER BOX */
-.miner-box {
-  background: rgba(255,255,255,0.05);
-  padding: 15px;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.miner-actions button {
-  padding: 8px;
-  border-radius: 6px;
-  border: none;
-  background: #ffd700;
-  color: #1a1a2e;
-  cursor: pointer;
-  font-weight: bold;
-  margin-right: 5px;
-}
-
-.miner-actions button:hover {
-  background: #ffed4e;
-}
-
-/* CRYPTO SELECTOR */
-.crypto-selector {
-  background: rgba(255,255,255,0.05);
-  padding: 15px;
-  border-radius: 10px;
-}
-
-/* CHART SECTION */
-.chart-section {
-  background: rgba(255,255,255,0.05);
-  padding: 15px;
-  border-radius: 10px;
-}
-
-select, button {
-  pointer-events: auto;
-}
-
-/* Responsive */
-@media(max-width:600px){
-  .auth-box, .miner-box {
-    width: 100%;
-  }
-}
+body{font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);color:#e0e0e0;margin:0;padding:0}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.header{text-align:center;margin-bottom:40px}
+.header h1{font-size:3em;background:linear-gradient(135deg,#ffd700,#ffed4e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{font-size:1.1em;color:#a0a0a0}
+.auth-container, .dashboard{display:flex;flex-direction:column;align-items:center;gap:16px}
+.auth-box, .miner-box{background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;border:1px solid rgba(255,215,0,0.06);width:320px}
+.auth-box input{padding:8px;margin-bottom:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#e0e0e0;width:100%}
+.auth-actions button, .miner-actions button, .logout-btn{padding:8px 10px;margin:2px;border-radius:6px;border:1px solid rgba(255,215,0,0.12);background:rgba(0,0,0,0.4);color:#ffd700;cursor:pointer}
+.auth-message, #minerMessage{margin-top:5px;color:#cfcfcf;text-align:center}
+.crypto-buttons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:10px 0}
+.crypto-btn{padding:10px 15px;background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.2);border-radius:6px;color:#e0e0e0;cursor:pointer;transition:all 0.3s}
+.crypto-btn.active{background:linear-gradient(135deg,#ffd700,#ffed4e);color:#1a1a2e;border-color:#ffd700}
+.chart-section{width:100%;max-width:900px;margin:0 auto;margin-top:20px}
+.chart-canvas{background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;border:1px solid rgba(255,215,0,0.08)}
+.tf-btn{padding:6px 12px;margin:0 2px;border-radius:5px;border:1px solid rgba(255,215,0,0.2);background:rgba(255,255,255,0.02);cursor:pointer;color:#e0e0e0}
+.tf-btn.active{background:linear-gradient(135deg,#ffd700,#ffed4e);color:#1a1a2e}
+@media(max-width:768px){.auth-box,.miner-box{width:90%}}
